@@ -1,0 +1,61 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Unsigned iOS IPA
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: |
+          cd ios-app
+          xcodegen generate
+
+      - name: Build Archive (Unsigned Release)
+        run: |
+          cd ios-app
+          xcodebuild archive \
+            -project ResidencyTracker.xcodeproj \
+            -scheme ResidencyTracker \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath build/ResidencyTracker.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_ENTITLEMENTS=""
+
+      - name: Package Unsigned IPA
+        run: |
+          cd ios-app
+          mkdir -p Payload
+          cp -r build/ResidencyTracker.xcarchive/Products/Applications/*.app Payload/
+          zip -r -y ResidencyTracker-Unsigned.ipa Payload
+          rm -rf Payload
+          echo "IPA Package created successfully at ios-app/ResidencyTracker-Unsigned.ipa"
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ResidencyTracker-Unsigned-IPA
+          path: ios-app/ResidencyTracker-Unsigned.ipa
+          retention-days: 14

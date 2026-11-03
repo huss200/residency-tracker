@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>نظام احتساب أيام الإقامة للدراسة بالخارج | ماجستير</title>
+    <!-- Local Offline Stylesheets -->
+    <link rel="stylesheet" href="css/flatpickr.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="light-theme">
+    <!-- Welcome / Splash Screen -->
+    <div class="splash-overlay" id="splashScreen">
+        <!-- Mode A: Returning Student Personalized Welcome -->
+        <div class="splash-card splash-welcome-card" id="splashReturningStudent" style="display: none;" onclick="event.stopPropagation()">
+            <div class="splash-icon">
+                <span class="splash-emoji-icon">🎓</span>
+            </div>
+            <span class="splash-badge">أهلاً وسهلاً بك مجدداً 👋</span>
+            <h2 class="splash-student-name" id="splashStudentName">اسم الطالب</h2>
+            <p class="splash-student-meta" id="splashStudentMeta">طالب ماجستير • قسم التخصص</p>
+            
+            <div class="splash-stats-pill" id="splashStatsPill">
+                <span id="splashStatsText">سجلك الأكاديمي جاهز لمتابعة أيام الإقامة</span>
+            </div>
+
+            <div class="splash-actions">
+                <button type="button" class="btn btn-primary splash-btn" onclick="closeSplash()">
+                    <span>الدخول إلى لوحة المتابعة</span>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Discrete Mini Credits for Developer Hussein Ali -->
+            <div class="splash-mini-footer">
+                <span>إعداد وتطوير: <strong>حسين علي</strong></span>
+                <span class="sep">•</span>
+                <span>📞 <a href="tel:07710601655">07710601655</a></span>
+                <span class="sep">•</span>
+                <span>📷 <a href="https://www.instagram.com/pt2b" target="_blank" rel="noopener">@pt2b</a></span>
+            </div>
+        </div>
+
+        <!-- Mode B: First-time Student Setup Card -->
+        <div class="splash-card splash-setup-card" id="splashNewStudent" style="display: none;" onclick="event.stopPropagation()">
+            <div class="splash-icon">
+                <span class="splash-emoji-icon">✨</span>
+            </div>
+            <h2 class="splash-setup-title">حاسبة أيام الإقامة للدراسة بالخارج</h2>
+            <p class="splash-setup-desc">مرحباً بك! يرجى إدخال بياناتك الأساسية لتهيئة سجلك الأكاديمي (تُحفظ مرة واحدة ويمكن تعديلها لاحقاً):</p>
+            
+            <form id="firstTimeSetupForm" onsubmit="handleFirstTimeSetup(event)" class="splash-form">
+                <div class="splash-form-group">
+                    <label for="initStudentName">اسم الطالب الكامل <span class="req">*</span></label>
+                    <input type="text" id="initStudentName" placeholder="مثال: أحمد عبد الله علي" required>
+                </div>
+
+                <div class="splash-form-row">
+                    <div class="splash-form-group">
+                        <label for="initDegree">المرحلة الدراسية</label>
+                        <select id="initDegree">
+                            <option value="ماجستير" selected>ماجستير</option>
+                            <option value="دكتوراه">دكتوراه</option>
+                            <option value="دبلوم عالي">دبلوم عالي</option>
+                            <option value="بكالوريوس">بكالوريوس</option>
+                        </select>
+                    </div>
+
+                    <div class="splash-form-group">
+                        <label for="initDepartment">القسم / التخصص <span class="req">*</span></label>
+                        <input type="text" id="initDepartment" placeholder="مثال: علوم الحاسوب" required>
+                    </div>
+                </div>
+
+                <div class="splash-form-row">
+                    <div class="splash-form-group">
+                        <label for="initCountry">بلد الدراسة والجامعة</label>
+                        <input type="text" id="initCountry" placeholder="مثال: جامعة القاهرة - مصر">
+                    </div>
+
+                    <div class="splash-form-group">
+                        <label for="initTargetDays">الهدف المطلوب (أيام) <span class="req">*</span></label>
+                        <input type="number" id="initTargetDays" value="180" min="1" required>
+                    </div>
+                </div>
+
+                <div class="splash-form-actions">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span>حفظ البيانات وبدء الاستخدام 🚀</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Discrete Mini Credits for Developer Hussein Ali -->
+            <div class="splash-mini-footer">
+                <span>إعداد وتطوير: <strong>حسين علي</strong></span>
+                <span class="sep">•</span>
+                <span>📞 <a href="tel:07710601655">07710601655</a></span>
+                <span class="sep">•</span>
+                <span>📷 <a href="https://www.instagram.com/pt2b" target="_blank" rel="noopener">@pt2b</a></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Wrapper -->
+    <div class="app-layout">
+        
+        <!-- Top Navigation Bar -->
+        <header class="app-header">
+            <div class="header-container">
+                <div class="brand-group">
+                    <div class="brand-logo">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h1>نظام متابعة واحتساب أيام الإقامة للدراسة بالخارج</h1>
+                        <p class="subtitle" id="headerSubtitle">متطلبات الإقامة للدراسات العليا • متابعة الأختام والتواريخ</p>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <!-- Quick Excel Download -->
+                    <button type="button" class="btn btn-outline btn-excel" onclick="exportToExcelClient()" title="تصدير ملف إكسل">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="8" y1="13" x2="16" y2="13"></line>
+                            <line x1="8" y1="17" x2="16" y2="17"></line>
+                            <line x1="10" y1="9" x2="8" y2="9"></line>
+                        </svg>
+                        <span>تصدير إكسل (CSV)</span>
+                    </button>
+
+                    <!-- Official Report Button -->
+                    <button type="button" class="btn btn-primary" onclick="openOfficialReportModal()" title="طباعة التقرير الرسمي للوزارة">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        <span>التقرير الرسمي المعتمد</span>
+                    </button>
+
+                    <!-- Settings Button -->
+                    <button type="button" class="btn btn-icon" onclick="openSettingsModal()" title="إعدادات الهدف وبيانات الطالب">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Theme Toggle Button -->
+                    <button type="button" class="btn btn-icon" id="themeToggleBtn" onclick="toggleTheme()" title="تبديل الوضع الليلي / الفاتح">
+                        <svg id="themeIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="main-content">
+
+            <!-- Stats Overview Cards -->
+            <section class="stats-grid">
+                <!-- Card 1: Total Days -->
+                <div class="stat-card card-primary">
+                    <div class="stat-icon-wrapper">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-label">إجمالي الأيام المحسوبة</span>
+                        <div class="stat-value-row">
+                            <h2 class="stat-value" id="statTotalDays">122</h2>
+                            <span class="stat-unit">يوماً</span>
+                        </div>
+                        <span class="stat-subtext" id="statDaysSubtext">مجموع أيام الإقامة المقضاة بالخارج</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Target & Achievement -->
+                <div class="stat-card card-success" id="targetCard">
+                    <div class="stat-icon-wrapper">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="m9 12 2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-label">المتطلب المطلوب للإقامة</span>
+                        <div class="stat-value-row">
+                            <h2 class="stat-value" id="statTargetDays">180</h2>
+                            <span class="stat-unit">يوم مستهدف</span>
+                        </div>
+                        <div class="target-badge-pill" id="targetStatusBadge">
+                            <span id="targetStatusText">متبقي 58 يوماً على الهدف</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Trips Count -->
+                <div class="stat-card card-info">
+                    <div class="stat-icon-wrapper">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13"></path>
+                            <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-label">عدد الفترات والسفرات</span>
+                        <div class="stat-value-row">
+                            <h2 class="stat-value" id="statTotalTrips">32</h2>
+                            <span class="stat-unit">فترة مسجلة</span>
+                        </div>
+                        <span class="stat-subtext">متوسط <strong id="statAvgDays">3.8</strong> أيام لكل سفرة</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Timeline Range -->
+                <div class="stat-card card-accent">
+                    <div class="stat-icon-wrapper">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-label">النطاق الزمني للإقامة</span>
+                        <div class="date-range-display">
+                            <div class="range-date-item">
+                                <span class="tag">البداية:</span>
+                                <span class="date-str" id="statFirstDate">2025-09-22</span>
+                            </div>
+                            <div class="range-date-item">
+                                <span class="tag">النهاية:</span>
+                                <span class="date-str" id="statLastDate">2026-10-20</span>
+                            </div>
+                        </div>
+                        <span class="stat-subtext">تمتد على مدار سنتين دراسيتين</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Bar Section -->
+            <section class="progress-section card-box">
+                <div class="progress-header">
+                    <div class="progress-info">
+                        <h3>نسبة إنجاز أيام الإقامة المطلوبة</h3>
+                        <p id="progressSummaryText">تم إنجاز 122 يوماً من أصل 180 يوماً مطلوبة</p>
+                    </div>
+                    <div class="progress-percentage" id="progressPercentage"><bdi>67.8%</bdi></div>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill" style="width: 67.8%;"></div>
+                </div>
+                <div class="progress-milestones">
+                    <span class="milestone-label">0 يوم</span>
+                    <span class="milestone-label" id="midMilestone">90 يوم (<bdi>50%</bdi>)</span>
+                    <span class="milestone-label milestone-target" id="endMilestone">الهدف: 180 يوم (<bdi>100%</bdi>)</span>
+                </div>
+            </section>
+
+            <!-- Add New Period Accordion / Form -->
+            <section class="add-period-section card-box">
+                <div class="section-title-bar">
+                    <div class="title-with-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <h3>إضافة فترة إقامة / سفرة جديدة</h3>
+                    </div>
+                    <span class="helper-badge">الحساب التلقائي للأيام مفعل تلقائياً</span>
+                </div>
+
+                <form id="addPeriodForm" onsubmit="handleAddPeriod(event)" class="period-form-grid">
+                    <div class="form-group">
+                        <label for="exitDate">تاريخ الخروج / السفر <span class="req">*</span></label>
+                        <div class="date-picker-wrap">
+                            <input type="text" id="exitDate" class="custom-datepicker" placeholder="سنة-شهر-يوم (مثال: 2025-09-22)" required>
+                            <span class="date-icon">📅</span>
+                        </div>
+                        <small class="hint">تاريخ المغادرة من بلد الإقامة / المباشرة</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exitPage">رقم صفحة الجواز (ختم الخروج)</label>
+                        <input type="text" id="exitPage" placeholder="مثال: 25">
+                        <small class="hint">رقم الصفحة لسهولة التدقيق والمطابقة</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entryDate">تاريخ الدخول / العودة <span class="req">*</span></label>
+                        <div class="date-picker-wrap">
+                            <input type="text" id="entryDate" class="custom-datepicker" placeholder="سنة-شهر-يوم (مثال: 2025-09-27)" required>
+                            <span class="date-icon">📅</span>
+                        </div>
+                        <small class="hint">تاريخ العودة / الدخول للبلاد</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entryPage">رقم صفحة الجواز (ختم الدخول)</label>
+                        <input type="text" id="entryPage" placeholder="مثال: 26">
+                        <small class="hint">رقم الصفحة في الجواز</small>
+                    </div>
+
+                    <div class="form-group days-group">
+                        <label for="calculatedDays">عدد الأيام المحسوبة <span class="req">*</span></label>
+                        <div class="days-input-wrapper">
+                            <input type="number" id="calculatedDays" min="1" required>
+                            <span class="days-addon">يوم</span>
+                        </div>
+                        <small class="hint">يحسب شاملاً يومي السفر (أو عدل يدوياً)</small>
+                    </div>
+
+                    <div class="form-group notes-group">
+                        <label for="periodNotes">الملاحظات (اختياري)</label>
+                        <input type="text" id="periodNotes" placeholder="مثال: مباشرة، مناقشة بحث، جواز جديد، إجازة...">
+                        <small class="hint">ملاحظات توثيقية خاصة بالملحقية أو الجواز</small>
+                    </div>
+
+                    <div class="form-actions-bar">
+                        <button type="submit" class="btn btn-primary btn-submit">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            <span>حفظ وإضافة إلى الجدول</span>
+                        </button>
+                        <button type="reset" class="btn btn-secondary">إعادة ضبط الحقول</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Table Controls & Search Bar -->
+            <section class="table-controls-bar">
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="بحث سريع في التواريخ، أرقام الصفحات، أو الملاحظات..." oninput="filterData()">
+                </div>
+
+                <div class="filters-group">
+                    <select id="yearFilter" onchange="filterData()">
+                        <option value="all">جميع السنوات</option>
+                        <option value="2025">سنة 2025</option>
+                        <option value="2026">سنة 2026</option>
+                    </select>
+
+                    <select id="notesFilter" onchange="filterData()">
+                        <option value="all">جميع الحالات</option>
+                        <option value="with_notes">فقط التي تحتوي ملاحظات</option>
+                        <option value="without_notes">بدون ملاحظات</option>
+                    </select>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="openBackupModal()" title="النسخ الاحتياطي والاستيراد">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span>نسخ احتياطي / استيراد</span>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary btn-sm btn-danger-soft" onclick="confirmReset()" title="استرجاع البيانات الأصلية للأكسل">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <polyline points="23 20 23 14 17 14"></polyline>
+                                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                            </svg>
+                            <span>استعادة 32 سفرة الأصلية</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Residency Records Table -->
+            <section class="table-container card-box">
+                <div class="table-responsive">
+                    <table class="residency-table" id="recordsTable">
+                        <thead>
+                            <tr>
+                                <th class="col-seq">ت</th>
+                                <th class="col-date">تاريخ الخروج</th>
+                                <th class="col-page">صفحة الجواز (خروج)</th>
+                                <th class="col-date">تاريخ الدخول</th>
+                                <th class="col-page">صفحة الجواز (دخول)</th>
+                                <th class="col-days">المدة (أيام)</th>
+                                <th class="col-notes">الملاحظات</th>
+                                <th class="col-cum">المجموع التراكمي</th>
+                                <th class="col-actions">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTableBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-total-row">
+                                <td colspan="5" class="total-label-cell">
+                                    <strong>الإجمالي الكلي لأيام الإقامة المحسوبة</strong>
+                                </td>
+                                <td class="total-days-cell">
+                                    <span class="total-badge" id="footerTotalDays">122</span>
+                                </td>
+                                <td id="footerNotesCount" class="total-meta-cell">32 سفرة مسجلة</td>
+                                <td class="total-cum-cell">
+                                    <strong id="footerCumulativeFinal">122 يوم</strong>
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div id="noResultsMessage" class="empty-state" style="display: none;">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <h4>لا توجد نتائج مطابقة لبحثك</h4>
+                    <p>جرب تغيير معايير البحث أو تصفية السنوات</p>
+                </div>
+            </section>
+
+            <!-- Visual Analytics & Charts Section -->
+            <section class="analytics-section">
+                <div class="analytics-card card-box">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            <h3>توزيع أيام الإقامة حسب الأشهر</h3>
+                        </div>
+                        <span class="chart-tag">معدل الإقامة الشهرية</span>
+                    </div>
+                    <div class="chart-body" id="monthlyChartContainer">
+                        <!-- Custom CSS/SVG Bar Chart rendered dynamically -->
+                    </div>
+                </div>
+
+                <div class="analytics-card card-box">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 2a10 10 0 0 1 10 10"></path>
+                            </svg>
+                            <h3>مقارنة إنجاز السنوات الدراسية</h3>
+                        </div>
+                        <span class="chart-tag">توزيع سنوي</span>
+                    </div>
+                    <div class="yearly-summary-grid" id="yearlySummaryContainer">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>نظام احتساب ومتابعة الإقامة للدراسات العليا والماجستير بالخارج • مصمم ومحدث وفق متطلبات معادلة الشهادات</p>
+            <div class="copyright-bar">
+                <span>© تصميم وتطوير: <strong>حسين علي</strong></span>
+                <span class="copyright-separator">|</span>
+                <span>📞 <a href="tel:07710601655" class="copyright-link">07710601655</a></span>
+                <span class="copyright-separator">|</span>
+                <span>📷 <a href="https://www.instagram.com/pt2b" target="_blank" rel="noopener" class="copyright-link">@pt2b</a></span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Edit Record Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>تعديل بيانات فترة الإقامة</h3>
+                <button type="button" class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editRecordForm" onsubmit="handleEditPeriod(event)">
+                <input type="hidden" id="editIndex">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editExitDate">تاريخ الخروج / السفر <span class="req">*</span></label>
+                        <div class="date-picker-wrap">
+                            <input type="text" id="editExitDate" class="custom-datepicker" placeholder="سنة-شهر-يوم (مثال: 2025-09-22)" required>
+                            <span class="date-icon">📅</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editExitPage">رقم صفحة الجواز (خروج)</label>
+                        <input type="text" id="editExitPage">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEntryDate">تاريخ الدخول / العودة <span class="req">*</span></label>
+                        <div class="date-picker-wrap">
+                            <input type="text" id="editEntryDate" class="custom-datepicker" placeholder="سنة-شهر-يوم (مثال: 2025-09-27)" required>
+                            <span class="date-icon">📅</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEntryPage">رقم صفحة الجواز (دخول)</label>
+                        <input type="text" id="editEntryPage">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDays">عدد الأيام المحسوبة <span class="req">*</span></label>
+                        <input type="number" id="editDays" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNotes">الملاحظات</label>
+                        <input type="text" id="editNotes">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>إعدادات متابعة الإقامة وبيانات الطالب</h3>
+                <button type="button" class="modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <form id="settingsForm" onsubmit="handleSettingsSave(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="setStudentName">اسم الطالب الكامل</label>
+                        <input type="text" id="setStudentName" placeholder="مثال: أحمد محمد علي">
+                    </div>
+                    <div class="form-group">
+                        <label for="setDegree">الدرجة العلمية / المرحلة</label>
+                        <input type="text" id="setDegree" placeholder="مثال: ماجستير / دكتوراه">
+                    </div>
+                    <div class="form-group">
+                        <label for="setDepartment">القسم / التخصص</label>
+                        <input type="text" id="setDepartment" placeholder="مثال: علوم الحاسوب / هندسة تقنية">
+                    </div>
+                    <div class="form-group">
+                        <label for="setCountry">بلد الدراسة والجامعة</label>
+                        <input type="text" id="setCountry" placeholder="مثال: جامعة القاهرة - مصر">
+                    </div>
+                    <div class="form-group">
+                        <label for="setTargetDays">الحد الأدنى المطلوب للإقامة (أيام) <span class="req">*</span></label>
+                        <input type="number" id="setTargetDays" min="1" required placeholder="مثال: 180 أو 240 أو 120">
+                        <small class="hint">وفق اشتراطات وزارة التعليم العالي أو الملحقية</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Backup & Restore Modal -->
+    <div class="modal-overlay" id="backupModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>النسخ الاحتياطي واستيراد البيانات</h3>
+                <button type="button" class="modal-close" onclick="closeBackupModal()">&times;</button>
+            </div>
+            <div class="modal-body backup-options">
+                <div class="backup-card">
+                    <h4>تصدير نسخة احتياطية (Backup)</h4>
+                    <p>قم بتحميل ملف JSON يحتوي على كافة الفترات والإعدادات للرجوع إليها في أي وقت أو نقلها لجهاز آخر.</p>
+                    <button type="button" class="btn btn-outline" onclick="exportToJsonBackup()">تحميل ملف النسخة الاحتياطية JSON</button>
+                </div>
+                <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+                <div class="backup-card">
+                    <h4>استعادة نسخة احتياطية (Restore)</h4>
+                    <p>اختر ملف JSON محفوظ سابقاً لاستعادة البيانات المسجلة فيه.</p>
+                    <input type="file" id="importJsonFileInput" accept=".json" style="margin-bottom: 12px; display: block; width: 100%;">
+                    <button type="button" class="btn btn-primary" onclick="handleImportJson()">استيراد الملف الآن</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBackupModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Official Report Print Modal -->
+    <div class="modal-overlay modal-wide" id="reportModal">
+        <div class="modal-card report-modal-card">
+            <div class="modal-header no-print">
+                <h3>معاينة تقرير الإقامة المعتمد للطباعة</h3>
+                <div class="header-modal-actions">
+                    <button type="button" class="btn btn-primary" onclick="printOfficialReport()">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        <span>طباعة التقرير / حفظ PDF</span>
+                    </button>
+                    <button type="button" class="modal-close" onclick="closeReportModal()">&times;</button>
+                </div>
+            </div>
+            
+            <!-- Printable Report Document -->
+            <div class="printable-document" id="printableReport">
+                <div class="report-official-header">
+                    <div class="report-header-col text-right">
+                        <h4>وزارة التعليم العالي والبحث العلمي</h4>
+                        <h5>دائرة البعثات والعلاقات الثقافية / الملحقية الثقافية</h5>
+                        <p>استمارة احتساب مدة الإقامة الفعلية في بلد الدراسة</p>
+                    </div>
+                    <div class="report-emblem">
+                        <div class="emblem-circle">
+                            <span>تقرير معتمد</span>
+                        </div>
+                    </div>
+                    <div class="report-header-col text-left">
+                        <p><strong>تاريخ التقرير:</strong> <span id="repDate"></span></p>
+                        <p><strong>المرحلة الدراسية:</strong> <span id="repDegHeader">الماجستير</span></p>
+                        <p><strong>حالة الإقامة:</strong> <span class="badge-passed" id="repStatus">مستوفي للمتطلب</span></p>
+                    </div>
+                </div>
+
+                <div class="student-info-strip">
+                    <div class="strip-item">
+                        <span class="label">اسم الطالب:</span>
+                        <span class="value" id="repName">طالب ماجستير</span>
+                    </div>
+                    <div class="strip-item">
+                        <span class="label">الدرجة والمرحلة:</span>
+                        <span class="value" id="repDeg">ماجستير</span>
+                    </div>
+                    <div class="strip-item">
+                        <span class="label">القسم / التخصص:</span>
+                        <span class="value" id="repDept">-</span>
+                    </div>
+                    <div class="strip-item">
+                        <span class="label">بلد الدراسة والجامعة:</span>
+                        <span class="value" id="repCtry">بلد الدراسة</span>
+                    </div>
+                    <div class="strip-item">
+                        <span class="label">المتطلب الأدنى المطلوب:</span>
+                        <span class="value" id="repTgt">180 يوم</span>
+                    </div>
+                </div>
+
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>ت</th>
+                            <th>تاريخ الخروج</th>
+                            <th>صفحة الجواز</th>
+                            <th>تاريخ الدخول</th>
+                            <th>صفحة الجواز</th>
+                            <th>الأيام المقضاة</th>
+                            <th>الملاحظات والتأشيرات</th>
+                            <th>المجموع التراكمي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="repTableBody">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="report-total-row">
+                            <td colspan="5" style="text-align: center; font-weight: bold;">
+                                إجمالي عدد أيام الإقامة المحسوبة فعلياً في بلد الدراسة
+                            </td>
+                            <td style="font-weight: 800; font-size: 1.1em; color: #166534;" id="repTotal">
+                                122 يوم
+                            </td>
+                            <td id="repSummaryResult" colspan="2" style="font-weight: bold;">
+                                تم استيفاء شرط الإقامة بنجاح
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="report-signatures">
+                    <div class="sig-block">
+                        <p>توقيع الطالب صاحب العلاقة:</p>
+                        <div class="sig-line">........................................</div>
+                        <p>التاريخ: &nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp; / 2026</p>
+                    </div>
+                    <div class="sig-block">
+                        <p>تدقيق مسؤول شؤون الطلبة:</p>
+                        <div class="sig-line">........................................</div>
+                        <p>التاريخ: &nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp; / 2026</p>
+                    </div>
+                    <div class="sig-block">
+                        <p>مصادقة الملحقية الثقافية / اللجنة:</p>
+                        <div class="sig-line">........................................</div>
+                        <p>الختم الرسمي</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toastNotification" class="toast-notification"></div>
+
+    <!-- Local Offline Scripts -->
+    <script src="js/flatpickr.min.js"></script>
+    <script src="js/flatpickr.ar.js"></script>
+    <script>
+        // ====================================================================
+        // ResidencyTracker Offline Client Engine (Standalone LocalStorage + iOS Bridge)
+        // ====================================================================
+
+        const INITIAL_DATA = [
+            {"id":1,"exit_date":"2025-09-22","exit_page":"1","entry_date":"2025-09-27","entry_page":"2","days":5,"notes":"مباشرة في 23/09/2025"},
+            {"id":2,"exit_date":"2025-10-25","exit_page":"2","entry_date":"2025-10-25","entry_page":"2","days":1,"notes":""},
+            {"id":3,"exit_date":"2025-10-31","exit_page":"3","entry_date":"2025-11-09","entry_page":"3","days":10,"notes":"جواز مؤقت"},
+            {"id":4,"exit_date":"2025-11-21","exit_page":"3","entry_date":"2025-11-22","entry_page":"3","days":2,"notes":""},
+            {"id":5,"exit_date":"2025-11-28","exit_page":"4","entry_date":"2025-11-30","entry_page":"4","days":3,"notes":""},
+            {"id":6,"exit_date":"2025-12-04","exit_page":"5","entry_date":"2025-12-07","entry_page":"5","days":4,"notes":""},
+            {"id":7,"exit_date":"2025-12-12","exit_page":"6","entry_date":"2025-12-14","entry_page":"6","days":3,"notes":""},
+            {"id":8,"exit_date":"2025-12-18","exit_page":"7","entry_date":"2025-12-21","entry_page":"7","days":4,"notes":""},
+            {"id":9,"exit_date":"2025-12-23","exit_page":"8","entry_date":"2025-12-25","entry_page":"8","days":3,"notes":""},
+            {"id":10,"exit_date":"2025-12-30","exit_page":"9","entry_date":"2025-12-31","entry_page":"9","days":2,"notes":""},
+            {"id":11,"exit_date":"2026-01-05","exit_page":"10","entry_date":"2026-01-07","entry_page":"10","days":3,"notes":""},
+            {"id":12,"exit_date":"2026-02-05","exit_page":"11","entry_date":"2026-02-15","entry_page":"11","days":11,"notes":""},
+            {"id":13,"exit_date":"2026-02-16","exit_page":"12","entry_date":"2026-02-17","entry_page":"12","days":2,"notes":""},
+            {"id":14,"exit_date":"2026-02-19","exit_page":"13","entry_date":"2026-02-20","entry_page":"13","days":2,"notes":""},
+            {"id":15,"exit_date":"2026-02-21","exit_page":"14","entry_date":"2026-02-22","entry_page":"14","days":2,"notes":""},
+            {"id":16,"exit_date":"2026-02-26","exit_page":"15","entry_date":"2026-02-27","entry_page":"15","days":2,"notes":""},
+            {"id":17,"exit_date":"2026-04-25","exit_page":"16","entry_date":"2026-04-25","entry_page":"16","days":1,"notes":""},
+            {"id":18,"exit_date":"2026-07-01","exit_page":"17","entry_date":"2026-07-02","entry_page":"7","days":2,"notes":""},
+            {"id":19,"exit_date":"2026-07-03","exit_page":"17","entry_date":"2026-07-04","entry_page":"16","days":2,"notes":""},
+            {"id":20,"exit_date":"2026-07-05","exit_page":"18","entry_date":"2026-07-06","entry_page":"18","days":2,"notes":""},
+            {"id":21,"exit_date":"2026-07-07","exit_page":"14","entry_date":"2026-07-08","entry_page":"18","days":2,"notes":""},
+            {"id":22,"exit_date":"2026-07-09","exit_page":"19","entry_date":"2026-07-10","entry_page":"19","days":2,"notes":""},
+            {"id":23,"exit_date":"2026-07-11","exit_page":"20","entry_date":"2026-07-12","entry_page":"21","days":2,"notes":""},
+            {"id":24,"exit_date":"2026-07-15","exit_page":"20","entry_date":"2026-07-16","entry_page":"21","days":2,"notes":""},
+            {"id":25,"exit_date":"2026-07-17","exit_page":"22","entry_date":"2026-07-18","entry_page":"22","days":2,"notes":""},
+            {"id":26,"exit_date":"2026-07-19","exit_page":"23","entry_date":"2026-07-20","entry_page":"23","days":2,"notes":""},
+            {"id":27,"exit_date":"2026-08-13","exit_page":"23","entry_date":"2026-08-14","entry_page":"1","days":2,"notes":""},
+            {"id":28,"exit_date":"2026-08-15","exit_page":"24","entry_date":"2026-08-25","entry_page":"24","days":11,"notes":""},
+            {"id":29,"exit_date":"2026-09-04","exit_page":"24","entry_date":"2026-09-14","entry_page":"25","days":11,"notes":""},
+            {"id":30,"exit_date":"2026-09-27","exit_page":"25","entry_date":"2026-10-05","entry_page":"26","days":9,"notes":""},
+            {"id":31,"exit_date":"2026-10-08","exit_page":"26","entry_date":"2026-10-12","entry_page":"27","days":5,"notes":""},
+            {"id":32,"exit_date":"2026-10-15","exit_page":"25","entry_date":"2026-10-20","entry_page":"27","days":6,"notes":""}
+        ];
+
+        let records = [];
+        let settings = {
+            student_name: "حسين علي",
+            degree_name: "ماجستير",
+            department: "",
+            country: "بلد الدراسة والابتعاث",
+            target_days: 180
+        };
+
+        let fpExitAdd, fpEntryAdd, fpExitEdit, fpEntryEdit;
+        let splashDismissTimer = null;
+
+        // Native iOS Bridge detection
+        function isIOSBridgeAvailable() {
+            return window.webkit && 
+                   window.webkit.messageHandlers && 
+                   window.webkit.messageHandlers.iosBridge;
+        }
+
+        function postToIOS(message) {
+            if (isIOSBridgeAvailable()) {
+                window.webkit.messageHandlers.iosBridge.postMessage(message);
+                return true;
+            }
+            return false;
+        }
+
+        // ===== Splash Screen Management =====
+        function closeSplash() {
+            if (splashDismissTimer) {
+                clearTimeout(splashDismissTimer);
+                splashDismissTimer = null;
+            }
+            const splash = document.getElementById('splashScreen');
+            if (splash) {
+                splash.classList.add('splash-hide');
+                setTimeout(() => { splash.style.display = "none"; }, 500);
+            }
+        }
+
+        function setupSplashScreen() {
+            const hasCustomStudent = settings.student_name && settings.student_name.trim().length > 0;
+            const splashWelcome = document.getElementById("splashReturningStudent");
+            const splashSetup = document.getElementById("splashNewStudent");
+
+            if (!hasCustomStudent) {
+                if (splashWelcome) splashWelcome.style.display = "none";
+                if (splashSetup) splashSetup.style.display = "block";
+                const initTarget = document.getElementById("initTargetDays");
+                if (initTarget && settings.target_days) initTarget.value = settings.target_days;
+            } else {
+                if (splashSetup) splashSetup.style.display = "none";
+                if (splashWelcome) splashWelcome.style.display = "block";
+
+                const nameEl = document.getElementById("splashStudentName");
+                const metaEl = document.getElementById("splashStudentMeta");
+                const statsEl = document.getElementById("splashStatsText");
+
+                if (nameEl) nameEl.textContent = settings.student_name;
+
+                const deg = settings.degree_name || "ماجستير";
+                const dept = settings.department ? ` • قسم ${settings.department}` : "";
+                if (metaEl) metaEl.textContent = `طالب ${deg}${dept}`;
+
+                const totalDays = records.reduce((s, r) => s + r.days, 0);
+                const targetDays = parseInt(settings.target_days) || 180;
+                const perc = targetDays > 0 ? ((totalDays / targetDays) * 100).toFixed(1) : "100.0";
+
+                if (statsEl) {
+                    if (records.length > 0) {
+                        statsEl.innerHTML = `تم إنجاز <strong>${totalDays}</strong> يوماً من أصل <strong>${targetDays}</strong> يوماً مطلوبة (${perc}%)`;
+                    } else {
+                        statsEl.textContent = `سجلك الأكاديمي جاهز لإضافة ومتابعة فترات السفر ✈️`;
+                    }
+                }
+
+                splashDismissTimer = setTimeout(closeSplash, 4000);
+            }
+        }
+
+        function handleFirstTimeSetup(e) {
+            e.preventDefault();
+            const name = document.getElementById("initStudentName").value.trim();
+            const degree = document.getElementById("initDegree").value.trim();
+            const department = document.getElementById("initDepartment").value.trim();
+            const country = document.getElementById("initCountry").value.trim();
+            const targetDays = parseInt(document.getElementById("initTargetDays").value) || 180;
+
+            if (!name) {
+                showToast("يرجى كتابة اسم الطالب الكامل");
+                return;
+            }
+
+            settings.student_name = name;
+            settings.degree_name = degree || "ماجستير";
+            settings.department = department || "";
+            settings.country = country || "بلد الدراسة والابتعاث";
+            settings.target_days = targetDays;
+
+            saveToStorage();
+            updateUI();
+            closeSplash();
+            showToast(`أهلاً بك يا ${name}! تم حفظ بياناتك بنجاح ✨`);
+        }
+
+        // ===== Data Initialization & Storage =====
+        function initPickers() {
+            if (typeof flatpickr !== "undefined") {
+                const arLocale = (flatpickr.l10ns && flatpickr.l10ns.ar) ? flatpickr.l10ns.ar : "ar";
+                fpExitAdd = flatpickr("#exitDate", { dateFormat: "Y-m-d", allowInput: true, locale: arLocale, disableMobile: true, onChange: () => calcDays('add') });
+                fpEntryAdd = flatpickr("#entryDate", { dateFormat: "Y-m-d", allowInput: true, locale: arLocale, disableMobile: true, onChange: () => calcDays('add') });
+                fpExitEdit = flatpickr("#editExitDate", { dateFormat: "Y-m-d", allowInput: true, locale: arLocale, disableMobile: true, onChange: () => calcDays('edit') });
+                fpEntryEdit = flatpickr("#editEntryDate", { dateFormat: "Y-m-d", allowInput: true, locale: arLocale, disableMobile: true, onChange: () => calcDays('edit') });
+            }
+        }
+
+        function init() {
+            initPickers();
+            initTheme();
+
+            const savedRecs = localStorage.getItem("residency_standalone_records") || localStorage.getItem("residency_records");
+            const savedSettings = localStorage.getItem("residency_standalone_settings") || localStorage.getItem("residency_settings");
+
+            if (savedRecs) {
+                try { records = JSON.parse(savedRecs); } catch (e) { records = JSON.parse(JSON.stringify(INITIAL_DATA)); }
+            } else {
+                records = JSON.parse(JSON.stringify(INITIAL_DATA));
+            }
+
+            if (savedSettings) {
+                try {
+                    settings = { ...settings, ...JSON.parse(savedSettings) };
+                } catch (e) {}
+            }
+
+            sortRecords();
+            setupSplashScreen();
+            updateUI();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem("residency_standalone_records", JSON.stringify(records));
+            localStorage.setItem("residency_standalone_settings", JSON.stringify(settings));
+        }
+
+        function sortRecords() {
+            records.sort((a, b) => (a.exit_date > b.exit_date ? 1 : -1));
+        }
+
+        // ===== UI Updates =====
+        function updateUI() {
+            const totalDays = records.reduce((s, r) => s + r.days, 0);
+            const totalTrips = records.length;
+            const targetDays = parseInt(settings.target_days) || 180;
+            const remaining = Math.max(0, targetDays - totalDays);
+            const surplus = Math.max(0, totalDays - targetDays);
+            const perc = targetDays > 0 ? ((totalDays / targetDays) * 100).toFixed(1) : "100.0";
+            const avg = totalTrips > 0 ? (totalDays / totalTrips).toFixed(1) : "0";
+
+            document.getElementById("statTotalDays").textContent = totalDays;
+            document.getElementById("statTargetDays").textContent = targetDays;
+            document.getElementById("statTotalTrips").textContent = totalTrips;
+            document.getElementById("statAvgDays").textContent = avg;
+            document.getElementById("statFirstDate").textContent = records.length > 0 ? records[0].exit_date : "-";
+            document.getElementById("statLastDate").textContent = records.length > 0 ? records[records.length - 1].entry_date : "-";
+
+            // Header Subtitle
+            const deg = settings.degree_name || "ماجستير";
+            const std = settings.student_name ? ` • الطالب: ${settings.student_name}` : "";
+            const dept = settings.department ? ` (${settings.department})` : "";
+            document.getElementById("headerSubtitle").textContent = `متطلبات الإقامة لشهادة ${deg}${std}${dept}`;
+
+            // Status Card & Badge
+            const targetCard = document.getElementById("targetCard");
+            const badge = document.getElementById("targetStatusBadge");
+            const txt = document.getElementById("targetStatusText");
+
+            if (totalDays >= targetDays) {
+                if (targetCard) {
+                    targetCard.classList.remove("card-warning");
+                    targetCard.classList.add("card-success");
+                }
+                badge.style.backgroundColor = "var(--success-soft)";
+                badge.style.color = "var(--success-text)";
+                txt.textContent = `تم تحقيق المطلوب بنجاح! (+${surplus} يوم)`;
+            } else {
+                if (targetCard) {
+                    targetCard.classList.remove("card-success");
+                    targetCard.classList.add("card-warning");
+                }
+                badge.style.backgroundColor = "var(--warning-soft)";
+                badge.style.color = "var(--warning-text)";
+                txt.textContent = `متبقي ${remaining} يوماً على الهدف (${targetDays} يوم)`;
+            }
+
+            // Progress Bar
+            document.getElementById("progressFill").style.width = `${Math.min(100, perc)}%`;
+            document.getElementById("progressPercentage").innerHTML = `<bdi>${perc}%</bdi>`;
+            document.getElementById("progressSummaryText").textContent = `تم إنجاز ${totalDays} يوماً من أصل ${targetDays} يوماً مطلوبة`;
+            document.getElementById("midMilestone").innerHTML = `${Math.round(targetDays / 2)} يوم (<bdi>50%</bdi>)`;
+            document.getElementById("endMilestone").innerHTML = `الهدف: ${targetDays} يوم (<bdi>100%</bdi>)`;
+
+            filterData();
+            renderCharts(records);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById("recordsTableBody");
+            const noResults = document.getElementById("noResultsMessage");
+            tbody.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                noResults.style.display = "block";
+                document.getElementById("footerTotalDays").textContent = "0";
+                document.getElementById("footerNotesCount").textContent = "0 سفرة";
+                document.getElementById("footerCumulativeFinal").textContent = "0 يوم";
+                return;
+            }
+
+            noResults.style.display = "none";
+            let cum = 0;
+            data.forEach((r, idx) => {
+                cum += r.days;
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="col-seq"><strong>${idx + 1}</strong></td>
+                    <td class="col-date">${r.exit_date}</td>
+                    <td class="col-page">${r.exit_page ? 'ص ' + escapeHtml(r.exit_page) : '-'}</td>
+                    <td class="col-date">${r.entry_date}</td>
+                    <td class="col-page">${r.entry_page ? 'ص ' + escapeHtml(r.entry_page) : '-'}</td>
+                    <td class="col-days"><span class="day-badge ${r.days >= 6 ? 'badge-long' : ''}">${r.days} يوم</span></td>
+                    <td class="col-notes">${r.notes ? `<span class="note-badge">${escapeHtml(r.notes)}</span>` : '<span style="color:var(--text-muted)">-</span>'}</td>
+                    <td class="col-cum"><strong>${cum}</strong></td>
+                    <td class="col-actions">
+                        <button type="button" class="action-btn" onclick="openEditModalById(${r.id})" title="تعديل">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            </svg>
+                        </button>
+                        <button type="button" class="action-btn delete-btn" onclick="deleteRecordById(${r.id})" title="حذف">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById("footerTotalDays").textContent = cum;
+            document.getElementById("footerNotesCount").textContent = `${data.length} سفرة معروضة`;
+            document.getElementById("footerCumulativeFinal").textContent = `${cum} يوم`;
+        }
+
+        // ===== Day Calculation =====
+        function calcDays(mode) {
+            let d1, d2, target;
+            if (mode === "add") {
+                d1 = new Date(document.getElementById("exitDate").value);
+                d2 = new Date(document.getElementById("entryDate").value);
+                target = document.getElementById("calculatedDays");
+            } else {
+                d1 = new Date(document.getElementById("editExitDate").value);
+                d2 = new Date(document.getElementById("editEntryDate").value);
+                target = document.getElementById("editDays");
+            }
+            if (!isNaN(d1) && !isNaN(d2)) {
+                if (d2 >= d1) {
+                    const days = Math.round((d2 - d1) / (1000 * 3600 * 24)) + 1;
+                    target.value = Math.max(1, days);
+                } else {
+                    alert("تنبيه: تاريخ الدخول يسبق تاريخ الخروج!");
+                    target.value = 1;
+                }
+            }
+        }
+
+        // ===== Add Period =====
+        function handleAddPeriod(e) {
+            e.preventDefault();
+            const exitDate = document.getElementById("exitDate").value;
+            const entryDate = document.getElementById("entryDate").value;
+
+            if (!exitDate || !entryDate) {
+                alert("يرجى تحديد تاريخ الخروج وتاريخ الدخول");
+                return;
+            }
+
+            const newRec = {
+                id: Date.now(),
+                exit_date: exitDate,
+                exit_page: document.getElementById("exitPage").value.trim(),
+                entry_date: entryDate,
+                entry_page: document.getElementById("entryPage").value.trim(),
+                days: parseInt(document.getElementById("calculatedDays").value) || 1,
+                notes: document.getElementById("periodNotes").value.trim()
+            };
+
+            records.push(newRec);
+            sortRecords();
+            saveToStorage();
+            updateUI();
+            document.getElementById("addPeriodForm").reset();
+            if (fpExitAdd) fpExitAdd.clear();
+            if (fpEntryAdd) fpEntryAdd.clear();
+            showToast("تمت إضافة الفترة بنجاح");
+        }
+
+        // ===== Edit Period =====
+        function openEditModalById(id) {
+            const idx = records.findIndex(r => r.id === id);
+            if (idx === -1) return;
+            const r = records[idx];
+
+            document.getElementById("editIndex").value = idx;
+            if (fpExitEdit) fpExitEdit.setDate(r.exit_date, true);
+            else document.getElementById("editExitDate").value = r.exit_date;
+            document.getElementById("editExitPage").value = r.exit_page || "";
+
+            if (fpEntryEdit) fpEntryEdit.setDate(r.entry_date, true);
+            else document.getElementById("editEntryDate").value = r.entry_date;
+            document.getElementById("editEntryPage").value = r.entry_page || "";
+
+            document.getElementById("editDays").value = r.days;
+            document.getElementById("editNotes").value = r.notes || "";
+            document.getElementById("editModal").classList.add("active");
+        }
+
+        function closeEditModal() {
+            document.getElementById("editModal").classList.remove("active");
+        }
+
+        function handleEditPeriod(e) {
+            e.preventDefault();
+            const idx = parseInt(document.getElementById("editIndex").value);
+            if (isNaN(idx) || !records[idx]) return;
+
+            records[idx] = {
+                ...records[idx],
+                exit_date: document.getElementById("editExitDate").value,
+                exit_page: document.getElementById("editExitPage").value.trim(),
+                entry_date: document.getElementById("editEntryDate").value,
+                entry_page: document.getElementById("editEntryPage").value.trim(),
+                days: parseInt(document.getElementById("editDays").value) || 1,
+                notes: document.getElementById("editNotes").value.trim()
+            };
+
+            sortRecords();
+            saveToStorage();
+            updateUI();
+            closeEditModal();
+            showToast("تم حفظ التعديلات بنجاح");
+        }
+
+        // ===== Delete & Reset =====
+        function deleteRecordById(id) {
+            if (confirm("هل أنت متأكد من رغبتك في حذف هذه الفترة من سجل الإقامة؟")) {
+                records = records.filter(r => r.id !== id);
+                saveToStorage();
+                updateUI();
+                showToast("تم حذف الفترة");
+            }
+        }
+
+        function confirmReset() {
+            if (confirm("هل ترغب حقاً في استعادة الـ 32 سفرة الأصلية (المجموع 122 يوماً) وإلغاء أي تعديلات يدوية؟")) {
+                records = JSON.parse(JSON.stringify(INITIAL_DATA));
+                saveToStorage();
+                updateUI();
+                showToast("تم استعادة الـ 32 سفرة الأصلية بنجاح!");
+            }
+        }
+
+        // ===== Filtering & Search =====
+        function filterData() {
+            const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+            const y = document.getElementById("yearFilter").value;
+            const n = document.getElementById("notesFilter").value;
+
+            const filtered = records.filter(r => {
+                if (y !== "all") {
+                    const y1 = r.exit_date ? r.exit_date.substring(0, 4) : "";
+                    const y2 = r.entry_date ? r.entry_date.substring(0, 4) : "";
+                    if (y1 !== y && y2 !== y) return false;
+                }
+                if (n === "with_notes" && !r.notes) return false;
+                if (n === "without_notes" && r.notes) return false;
+                if (q) {
+                    const matchDate = (r.exit_date && r.exit_date.includes(q)) || (r.entry_date && r.entry_date.includes(q));
+                    const matchPage = (r.exit_page && r.exit_page.toLowerCase().includes(q)) || (r.entry_page && r.entry_page.toLowerCase().includes(q));
+                    const matchNotes = r.notes && r.notes.toLowerCase().includes(q);
+                    return matchDate || matchPage || matchNotes;
+                }
+                return true;
+            });
+
+            renderTable(filtered);
+        }
+
+        // ===== Charts =====
+        function renderCharts(data) {
+            const mContainer = document.getElementById("monthlyChartContainer");
+            const yContainer = document.getElementById("yearlySummaryContainer");
+            if (!mContainer || !yContainer) return;
+
+            mContainer.innerHTML = "";
+            yContainer.innerHTML = "";
+
+            if (data.length === 0) {
+                mContainer.innerHTML = '<span style="color:var(--text-muted);margin:auto;">لا تتوفر بيانات كافية</span>';
+                yContainer.innerHTML = '<span style="color:var(--text-muted);margin:auto;">لا تتوفر بيانات كافية</span>';
+                return;
+            }
+
+            const mMap = {};
+            const yMap = {};
+            data.forEach(r => {
+                if (r.exit_date) {
+                    const ym = r.exit_date.substring(0, 7);
+                    const yr = r.exit_date.substring(0, 4);
+                    mMap[ym] = (mMap[ym] || 0) + r.days;
+                    yMap[yr] = (yMap[yr] || 0) + r.days;
+                }
+            });
+
+            const maxDays = Math.max(...Object.values(mMap), 1);
+            Object.keys(mMap).sort().forEach(k => {
+                const col = document.createElement("div");
+                col.className = "bar-column";
+                const h = Math.max(12, Math.round((mMap[k] / maxDays) * 100));
+                col.innerHTML = `
+                    <span class="bar-val">${mMap[k]} ي</span>
+                    <div class="bar-fill" style="height:${h}%;"></div>
+                    <span class="bar-label">${k}</span>
+                `;
+                mContainer.appendChild(col);
+            });
+
+            Object.keys(yMap).sort().forEach(yr => {
+                const yBox = document.createElement("div");
+                yBox.className = "year-box";
+                yBox.innerHTML = `
+                    <div>
+                        <div class="year-title">سنة ${yr}</div>
+                        <small style="color:var(--text-muted)">أيام الإقامة المسجلة</small>
+                    </div>
+                    <div class="year-days">${yMap[yr]} <span style="font-size:0.85rem">يوم</span></div>
+                `;
+                yContainer.appendChild(yBox);
+            });
+        }
+
+        // ===== Settings Modal =====
+        function openSettingsModal() {
+            document.getElementById("setStudentName").value = settings.student_name || "";
+            document.getElementById("setDegree").value = settings.degree_name || "ماجستير";
+            document.getElementById("setDepartment").value = settings.department || "";
+            document.getElementById("setCountry").value = settings.country || "";
+            document.getElementById("setTargetDays").value = settings.target_days || 180;
+            document.getElementById("settingsModal").classList.add("active");
+        }
+
+        function closeSettingsModal() {
+            document.getElementById("settingsModal").classList.remove("active");
+        }
+
+        function handleSettingsSave(e) {
+            e.preventDefault();
+            settings.student_name = document.getElementById("setStudentName").value.trim();
+            settings.degree_name = document.getElementById("setDegree").value.trim();
+            settings.department = document.getElementById("setDepartment").value.trim();
+            settings.country = document.getElementById("setCountry").value.trim();
+            settings.target_days = parseInt(document.getElementById("setTargetDays").value) || 180;
+            saveToStorage();
+            updateUI();
+            closeSettingsModal();
+            showToast("تم حفظ الإعدادات بنجاح!");
+        }
+
+        // ===== Official Report Modal =====
+        function openOfficialReportModal() {
+            const todayStr = new Date().toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
+            document.getElementById("repDate").textContent = todayStr;
+            document.getElementById("repName").textContent = settings.student_name || "طالب دراسات عليا";
+            document.getElementById("repDeg").textContent = settings.degree_name || "ماجستير";
+            document.getElementById("repDegHeader").textContent = settings.degree_name || "الماجستير";
+            document.getElementById("repDept").textContent = settings.department || "-";
+            document.getElementById("repCtry").textContent = settings.country || "بلد الدراسة والابتعاث";
+            document.getElementById("repTgt").textContent = `${settings.target_days} يوم`;
+
+            const total = records.reduce((s, r) => s + r.days, 0);
+            document.getElementById("repTotal").textContent = `${total} يوم`;
+            const statusEl = document.getElementById("repStatus");
+            const sumEl = document.getElementById("repSummaryResult");
+
+            if (total >= settings.target_days) {
+                statusEl.textContent = "مستوفي للمتطلب بنجاح";
+                statusEl.className = "badge-passed";
+                sumEl.textContent = `تم استيفاء شرط الإقامة بنجاح (فائض: ${total - settings.target_days} يوم)`;
+                sumEl.style.color = "#166534";
+            } else {
+                statusEl.textContent = "قيد الاستيفاء";
+                statusEl.className = "badge-pending";
+                sumEl.textContent = `متبقي لاستيفاء الشرط: ${settings.target_days - total} يوم`;
+                sumEl.style.color = "#b45309";
+            }
+
+            const tbody = document.getElementById("repTableBody");
+            tbody.innerHTML = "";
+            let cum = 0;
+            records.forEach((r, idx) => {
+                cum += r.days;
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td style="direction:ltr; font-family:monospace;">${r.exit_date}</td>
+                    <td>${r.exit_page || '-'}</td>
+                    <td style="direction:ltr; font-family:monospace;">${r.entry_date}</td>
+                    <td>${r.entry_page || '-'}</td>
+                    <td style="font-weight:bold;">${r.days}</td>
+                    <td style="text-align:right;">${escapeHtml(r.notes || '-')}</td>
+                    <td style="font-weight:bold;">${cum}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById("reportModal").classList.add("active");
+        }
+
+        function closeReportModal() {
+            document.getElementById("reportModal").classList.remove("active");
+        }
+
+        function printOfficialReport() {
+            if (isIOSBridgeAvailable()) {
+                postToIOS({ action: "printReport" });
+                return;
+            }
+            window.print();
+        }
+
+        // ===== Export & Backup (Native iOS Bridge + Browser Fallback) =====
+        function exportToExcelClient() {
+            let csv = "\uFEFFت,تاريخ الخروج,رقم صفحة الجواز (خروج),تاريخ الدخول,رقم صفحة الجواز (دخول),عدد الأيام,الملاحظات,المجموع التراكمي\n";
+            let cum = 0;
+            records.forEach((r, idx) => {
+                cum += r.days;
+                csv += `"${idx + 1}","${r.exit_date}","${r.exit_page || ''}","${r.entry_date}","${r.entry_page || ''}","${r.days}","${(r.notes || '').replace(/"/g, '""')}","${cum}"\n`;
+            });
+            const filename = `جدول_أيام_الإقامة_${new Date().toISOString().split("T")[0]}.csv`;
+
+            if (isIOSBridgeAvailable()) {
+                postToIOS({
+                    action: "exportFile",
+                    filename: filename,
+                    content: csv,
+                    mimeType: "text/csv;charset=utf-8;"
+                });
+                showToast("جاري تصدير الملف عبر نظام iOS...");
+                return;
+            }
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("تم تصدير ملف الإكسل بنجاح");
+        }
+
+        function exportToJsonBackup() {
+            const jsonStr = JSON.stringify({ settings, records }, null, 2);
+            const filename = `residency_backup_${new Date().toISOString().split("T")[0]}.json`;
+
+            if (isIOSBridgeAvailable()) {
+                postToIOS({
+                    action: "exportFile",
+                    filename: filename,
+                    content: jsonStr,
+                    mimeType: "application/json;charset=utf-8;"
+                });
+                showToast("جاري حفظ النسخة الاحتياطية...");
+                return;
+            }
+
+            const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("تم تصدير النسخة الاحتياطية بنجاح");
+        }
+
+        function openBackupModal() {
+            document.getElementById("backupModal").classList.add("active");
+        }
+
+        function closeBackupModal() {
+            document.getElementById("backupModal").classList.remove("active");
+        }
+
+        function handleImportJson() {
+            const input = document.getElementById("importJsonFileInput");
+            if (!input.files || input.files.length === 0) {
+                alert("يرجى اختيار ملف JSON أولاً");
+                return;
+            }
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.records && Array.isArray(data.records)) {
+                        records = data.records;
+                        if (data.settings && typeof data.settings === 'object') {
+                            settings = { ...settings, ...data.settings };
+                        }
+                    } else if (Array.isArray(data)) {
+                        records = data;
+                    } else {
+                        alert("صيغة الملف غير متوافقة");
+                        return;
+                    }
+                    sortRecords();
+                    saveToStorage();
+                    updateUI();
+                    closeBackupModal();
+                    showToast(`تم استيراد ${records.length} فترة بنجاح!`);
+                } catch (err) {
+                    alert("خطأ أثناء قراءة ملف JSON: " + err.message);
+                }
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        // ===== Theme & Toast Helpers =====
+        function initTheme() {
+            const saved = localStorage.getItem("residency_theme") || "light";
+            if (saved === "dark") {
+                document.body.classList.remove("light-theme");
+                document.body.classList.add("dark-theme");
+                updateThemeIcon(true);
+            } else {
+                document.body.classList.remove("dark-theme");
+                document.body.classList.add("light-theme");
+                updateThemeIcon(false);
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.contains("dark-theme");
+            if (isDark) {
+                document.body.classList.remove("dark-theme");
+                document.body.classList.add("light-theme");
+                localStorage.setItem("residency_theme", "light");
+                updateThemeIcon(false);
+            } else {
+                document.body.classList.remove("light-theme");
+                document.body.classList.add("dark-theme");
+                localStorage.setItem("residency_theme", "dark");
+                updateThemeIcon(true);
+            }
+        }
+
+        function updateThemeIcon(isDark) {
+            const icon = document.getElementById("themeIcon");
+            if (!icon) return;
+            if (isDark) {
+                icon.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+            } else {
+                icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById("toastNotification");
+            if (!t) return;
+            t.textContent = msg;
+            t.className = "toast-notification show toast-success";
+            setTimeout(() => { t.className = "toast-notification"; }, 3500);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Initialize engine on DOM Ready
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+</html>

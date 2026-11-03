@@ -1,0 +1,37 @@
+name: ResidencyTracker
+options:
+  bundleIdPrefix: com.hussainali
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "15.0"
+  groupSortPosition: top
+
+settings:
+  base:
+    PRODUCT_NAME: "ResidencyTracker"
+    PRODUCT_BUNDLE_IDENTIFIER: com.hussainali.residencytracker
+    INFOPLIST_FILE: ResidencyTracker/Info.plist
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGNING_REQUIRED: "NO"
+    CODE_SIGNING_ALLOWED: "NO"
+    CODE_SIGN_IDENTITY: ""
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  ResidencyTracker:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: ResidencyTracker/App
+      - path: ResidencyTracker/Assets.xcassets
+      - path: ResidencyTracker/Resources/Web
+        buildPhase: resources
+        type: folder
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_FILE: ResidencyTracker/Info.plist
