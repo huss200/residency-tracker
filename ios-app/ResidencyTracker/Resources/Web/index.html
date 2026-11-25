@@ -39,8 +39,6 @@
             <div class="splash-mini-footer">
                 <span>إعداد وتطوير: <strong>حسين علي</strong></span>
                 <span class="sep">•</span>
-                <span>📞 <a href="tel:07710601655">07710601655</a></span>
-                <span class="sep">•</span>
                 <span>📷 <a href="https://www.instagram.com/pt2b" target="_blank" rel="noopener">@pt2b</a></span>
             </div>
         </div>
@@ -98,8 +96,6 @@
             <!-- Discrete Mini Credits for Developer Hussein Ali -->
             <div class="splash-mini-footer">
                 <span>إعداد وتطوير: <strong>حسين علي</strong></span>
-                <span class="sep">•</span>
-                <span>📞 <a href="tel:07710601655">07710601655</a></span>
                 <span class="sep">•</span>
                 <span>📷 <a href="https://www.instagram.com/pt2b" target="_blank" rel="noopener">@pt2b</a></span>
             </div>
@@ -482,8 +478,6 @@
             <div class="copyright-bar">
                 <span>© تصميم وتطوير: <strong>حسين علي</strong></span>
                 <span class="copyright-separator">|</span>
-                <span>📞 <a href="tel:07710601655" class="copyright-link">07710601655</a></span>
-                <span class="copyright-separator">|</span>
                 <span>📷 <a href="https://www.instagram.com/pt2b" target="_blank" rel="noopener" class="copyright-link">@pt2b</a></span>
             </div>
         </footer>
@@ -728,44 +722,11 @@
         // ResidencyTracker Offline Client Engine (Standalone LocalStorage + iOS Bridge)
         // ====================================================================
 
-        const INITIAL_DATA = [
-            {"id":1,"exit_date":"2025-09-22","exit_page":"1","entry_date":"2025-09-27","entry_page":"2","days":5,"notes":"مباشرة في 23/09/2025"},
-            {"id":2,"exit_date":"2025-10-25","exit_page":"2","entry_date":"2025-10-25","entry_page":"2","days":1,"notes":""},
-            {"id":3,"exit_date":"2025-10-31","exit_page":"3","entry_date":"2025-11-09","entry_page":"3","days":10,"notes":"جواز مؤقت"},
-            {"id":4,"exit_date":"2025-11-21","exit_page":"3","entry_date":"2025-11-22","entry_page":"3","days":2,"notes":""},
-            {"id":5,"exit_date":"2025-11-28","exit_page":"4","entry_date":"2025-11-30","entry_page":"4","days":3,"notes":""},
-            {"id":6,"exit_date":"2025-12-04","exit_page":"5","entry_date":"2025-12-07","entry_page":"5","days":4,"notes":""},
-            {"id":7,"exit_date":"2025-12-12","exit_page":"6","entry_date":"2025-12-14","entry_page":"6","days":3,"notes":""},
-            {"id":8,"exit_date":"2025-12-18","exit_page":"7","entry_date":"2025-12-21","entry_page":"7","days":4,"notes":""},
-            {"id":9,"exit_date":"2025-12-23","exit_page":"8","entry_date":"2025-12-25","entry_page":"8","days":3,"notes":""},
-            {"id":10,"exit_date":"2025-12-30","exit_page":"9","entry_date":"2025-12-31","entry_page":"9","days":2,"notes":""},
-            {"id":11,"exit_date":"2026-01-05","exit_page":"10","entry_date":"2026-01-07","entry_page":"10","days":3,"notes":""},
-            {"id":12,"exit_date":"2026-02-05","exit_page":"11","entry_date":"2026-02-15","entry_page":"11","days":11,"notes":""},
-            {"id":13,"exit_date":"2026-02-16","exit_page":"12","entry_date":"2026-02-17","entry_page":"12","days":2,"notes":""},
-            {"id":14,"exit_date":"2026-02-19","exit_page":"13","entry_date":"2026-02-20","entry_page":"13","days":2,"notes":""},
-            {"id":15,"exit_date":"2026-02-21","exit_page":"14","entry_date":"2026-02-22","entry_page":"14","days":2,"notes":""},
-            {"id":16,"exit_date":"2026-02-26","exit_page":"15","entry_date":"2026-02-27","entry_page":"15","days":2,"notes":""},
-            {"id":17,"exit_date":"2026-04-25","exit_page":"16","entry_date":"2026-04-25","entry_page":"16","days":1,"notes":""},
-            {"id":18,"exit_date":"2026-07-01","exit_page":"17","entry_date":"2026-07-02","entry_page":"7","days":2,"notes":""},
-            {"id":19,"exit_date":"2026-07-03","exit_page":"17","entry_date":"2026-07-04","entry_page":"16","days":2,"notes":""},
-            {"id":20,"exit_date":"2026-07-05","exit_page":"18","entry_date":"2026-07-06","entry_page":"18","days":2,"notes":""},
-            {"id":21,"exit_date":"2026-07-07","exit_page":"14","entry_date":"2026-07-08","entry_page":"18","days":2,"notes":""},
-            {"id":22,"exit_date":"2026-07-09","exit_page":"19","entry_date":"2026-07-10","entry_page":"19","days":2,"notes":""},
-            {"id":23,"exit_date":"2026-07-11","exit_page":"20","entry_date":"2026-07-12","entry_page":"21","days":2,"notes":""},
-            {"id":24,"exit_date":"2026-07-15","exit_page":"20","entry_date":"2026-07-16","entry_page":"21","days":2,"notes":""},
-            {"id":25,"exit_date":"2026-07-17","exit_page":"22","entry_date":"2026-07-18","entry_page":"22","days":2,"notes":""},
-            {"id":26,"exit_date":"2026-07-19","exit_page":"23","entry_date":"2026-07-20","entry_page":"23","days":2,"notes":""},
-            {"id":27,"exit_date":"2026-08-13","exit_page":"23","entry_date":"2026-08-14","entry_page":"1","days":2,"notes":""},
-            {"id":28,"exit_date":"2026-08-15","exit_page":"24","entry_date":"2026-08-25","entry_page":"24","days":11,"notes":""},
-            {"id":29,"exit_date":"2026-09-04","exit_page":"24","entry_date":"2026-09-14","entry_page":"25","days":11,"notes":""},
-            {"id":30,"exit_date":"2026-09-27","exit_page":"25","entry_date":"2026-10-05","entry_page":"26","days":9,"notes":""},
-            {"id":31,"exit_date":"2026-10-08","exit_page":"26","entry_date":"2026-10-12","entry_page":"27","days":5,"notes":""},
-            {"id":32,"exit_date":"2026-10-15","exit_page":"25","entry_date":"2026-10-20","entry_page":"27","days":6,"notes":""}
-        ];
+        const INITIAL_DATA = [];
 
         let records = [];
         let settings = {
-            student_name: "حسين علي",
+            student_name: "",
             degree_name: "ماجستير",
             department: "",
             country: "بلد الدراسة والابتعاث",
