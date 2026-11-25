@@ -8,11 +8,9 @@
 - **واجهة عربية متكاملة (`RTL`):** تدعم الوضع الفاتح والداكن مع منتقي تواريخ عربي مدمج (`Flatpickr`).
 - **تطبيق iOS أصلي خفيف:** مبني بـ SwiftUI + WKWebView مع جسر محلي للحفظ الآمن.
 
-## 📲 التثبيت على الآيفون (iOS)
-1. انتقل إلى صفحة **[Releases](../../releases)** وحمّل ملف **`ResidencyTracker-Unsigned.ipa`**.
-2. ثبّت التطبيق على جهازك باستخدام أحد برامج التوقيع الذاتي المجانية مثل:
-   - **AltStore** / **SideStore**
-   - **Sideloadly**
+## 📲 التثبيت (iOS & Android)
+- **Android (APK):** حمّل ملف **`ResidencyTracker-Android.apk`** من صفحة **[Releases](../../releases)** وثبّته مباشرة (يعمل بقاعدة بيانات SQLite / Room محلية بالكامل).
+- **iOS (IPA):** حمّل ملف **`ResidencyTracker-Unsigned.ipa`** من صفحة **[Releases](../../releases)** وثبّته عبر **AltStore** / **SideStore** / **Sideloadly**.
 
 ## 🛠️ البناء من المصدر
 يتم بناء نسخة `.ipa` غير الموقّعة تلقائياً عبر GitHub Actions (`macos-latest` + `XcodeGen`). لبنائها محلياً على macOS:

@@ -743,7 +743,20 @@
                    window.webkit.messageHandlers.iosBridge;
         }
 
+        function isAndroidBridgeAvailable() {
+            return typeof window.AndroidBridge !== "undefined" && window.AndroidBridge !== null;
+        }
+
         function postToIOS(message) {
+            if (isAndroidBridgeAvailable() && message && message.action) {
+                if (message.action === "exportFile") {
+                    return window.AndroidBridge.exportFile(message.filename || "export.txt", message.content || "");
+                }
+                if (message.action === "printReport") {
+                    window.AndroidBridge.printReport();
+                    return true;
+                }
+            }
             if (isIOSBridgeAvailable()) {
                 window.webkit.messageHandlers.iosBridge.postMessage(message);
                 return true;
@@ -844,19 +857,32 @@
             initPickers();
             initTheme();
 
-            const savedRecs = localStorage.getItem("residency_standalone_records") || localStorage.getItem("residency_records");
-            const savedSettings = localStorage.getItem("residency_standalone_settings") || localStorage.getItem("residency_settings");
-
-            if (savedRecs) {
-                try { records = JSON.parse(savedRecs); } catch (e) { records = JSON.parse(JSON.stringify(INITIAL_DATA)); }
-            } else {
-                records = JSON.parse(JSON.stringify(INITIAL_DATA));
-            }
-
-            if (savedSettings) {
+            if (isAndroidBridgeAvailable()) {
                 try {
-                    settings = { ...settings, ...JSON.parse(savedSettings) };
+                    const dbRecs = JSON.parse(window.AndroidBridge.getRecordsJson() || "[]");
+                    records = Array.isArray(dbRecs) ? dbRecs : [];
+                } catch (e) { records = []; }
+                try {
+                    const dbSettings = JSON.parse(window.AndroidBridge.getSettingsJson() || "{}");
+                    if (dbSettings && typeof dbSettings === "object") {
+                        settings = { ...settings, ...dbSettings };
+                    }
                 } catch (e) {}
+            } else {
+                const savedRecs = localStorage.getItem("residency_standalone_records") || localStorage.getItem("residency_records");
+                const savedSettings = localStorage.getItem("residency_standalone_settings") || localStorage.getItem("residency_settings");
+
+                if (savedRecs) {
+                    try { records = JSON.parse(savedRecs); } catch (e) { records = JSON.parse(JSON.stringify(INITIAL_DATA)); }
+                } else {
+                    records = JSON.parse(JSON.stringify(INITIAL_DATA));
+                }
+
+                if (savedSettings) {
+                    try {
+                        settings = { ...settings, ...JSON.parse(savedSettings) };
+                    } catch (e) {}
+                }
             }
 
             sortRecords();
@@ -865,6 +891,11 @@
         }
 
         function saveToStorage() {
+            if (isAndroidBridgeAvailable()) {
+                window.AndroidBridge.saveRecordsJson(JSON.stringify(records));
+                window.AndroidBridge.saveSettingsJson(JSON.stringify(settings));
+                return;
+            }
             localStorage.setItem("residency_standalone_records", JSON.stringify(records));
             localStorage.setItem("residency_standalone_settings", JSON.stringify(settings));
         }
